@@ -1,0 +1,9 @@
+{
+	'v': ['FF','CF','SS',RP','AP','type','location'],
+	'E': [['FF','location'],
+		  ['CF','type'],
+		  ['SS','type'],
+		  ['RP','location'],
+		  ['AP','location']
+		 ]
+}

@@ -9,17 +9,8 @@ import torch.optim as optim
 import torch.autograd as autograd
 from torch.autograd import Variable
 
-# Discount factor. Model is not very sensitive to this value.
-GAMMA = .95
 
-# LR of 3e-2 explodes the gradients, LR of 3e-4 trains slower
-LR = 3e-3
-N_GAMES = 2000
-
-# OpenAI baselines uses nstep of 5.
-N_STEPS = 5
-
-N_ACTIONS = 100 # get from env
+N_ACTIONS = 100+360 # get from env
 N_INPUTS = 1 # get from env
 
 
