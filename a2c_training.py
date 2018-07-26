@@ -3,14 +3,23 @@ import a2c
 import RLsetup
 
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
+import torch.autograd as autograd
+from torch.autograd import Variable
 
+import numpy as np
+
+# Discount factor. Model is not very sensitive to this value.
+GAMMA = .95
 LR = 3e-3
 model = a2c.ActorCritic()
 optimizer = optim.Adam(model.parameters(), lr=LR)
 
 N_GAMES = 2000
 N_STEPS = 5
+N_ACTIONS = 8
 
 env = RLsetup.imgexp()
 
@@ -24,17 +33,24 @@ def train():
 
 		# Gather training data
 		for i in range(N_STEPS):
-			# state ??
+			# state
+			flat_state = [item for sublist in state for item in sublist]
+			state = np.array(flat_state)
 			s = Variable(torch.from_numpy(state).float().unsqueeze(0))
 
 			action_probs = model.get_action_probs(s)
-			action = action_probs.multinomial().data[0][0]
-
+			action = action_probs.multinomial(N_ACTIONS).data[0][0]
+			print 'action: ', action
 			next_state, reward, done, _ = env.step(action)
+			#print 'next state ', next_state
+			print 'reward ', reward
+			#print 'done ', done
 
 			states.append(state); actions.append(action); rewards.append(reward); dones.append(done)
 
-			if done: state = env.reset(); finished_games += 1
+			if done: 
+				state = env.reset()
+				finished_games += 1
 			else: state = next_state
 
 		# Reflect on training data
@@ -43,7 +59,7 @@ def train():
 def reflect(states, actions, rewards, dones):
 	
 	# Calculating the ground truth "labels" as described above
-	state_values_true = calc_actual_state_values(rewards, dones)
+	state_values_true = calc_actual_state_values(states,rewards, dones)
 
 	s = Variable(torch.FloatTensor(states))
 	action_probs, state_values_est = model.evaluate_actions(s)
@@ -65,7 +81,7 @@ def reflect(states, actions, rewards, dones):
 	nn.utils.clip_grad_norm(model.parameters(), 0.5)
 	optimizer.step()
 
-def calc_actual_state_values(rewards, dones):
+def calc_actual_state_values(states, rewards, dones):
 	R = []
 	rewards.reverse()
 
@@ -93,3 +109,6 @@ def calc_actual_state_values(rewards, dones):
 	return state_values_true
 
 if __name__ == '__main__':
+	train()
+
+

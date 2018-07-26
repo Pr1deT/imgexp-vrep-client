@@ -10,8 +10,8 @@ import torch.autograd as autograd
 from torch.autograd import Variable
 
 
-N_ACTIONS = 100+360 # get from env
-N_INPUTS = 1 # get from env
+N_ACTIONS = 8 # get from env
+N_INPUTS = 9 # get from env
 
 
 

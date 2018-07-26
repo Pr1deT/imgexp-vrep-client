@@ -13,7 +13,7 @@ except:
 	print ('--------------------------------------------------------------')
 	print ('')
 
-class vrepsim(object):
+class vrepsim:
 	def __init__(self):
 		# -1: not connected
 		self.clientID = -1
@@ -70,7 +70,7 @@ class vrepsim(object):
 
 		else:
 			#set omega to initial position
-			res = vrep.simxSetObjectPosition(self.clientID,omega,-1,self.init_pos,vrep.simx_opmode_blocking)
+			res = vrep.simxSetObjectPosition(self.clientID,self.omega,-1,self.init_pos,vrep.simx_opmode_blocking)
 			if res==vrep.simx_return_ok:
 				print ("Reset Omega position") # display the reply from V-REP (in this case, the handle of the created dummy)
 				return True
@@ -82,6 +82,21 @@ class vrepsim(object):
 		self.end_state = self.start_state
 
 		return True
+	
+	def get_obj_size(self, name):
+		# get handle
+		"""
+		res, red_h = vrep.simxGetObjectHandle(self.clientID,name,vrep.simx_opmode_blocking)
+		if res==vrep.simx_return_ok:
+			print ("Get object handle") # display the reply from V-REP (in this case, the handle of the created dummy)
+		else:
+			print ('Remote function call failed: Get object handle')
+			return False
+		res,x = vrep.simxGetObjectFloatParameter(self.clientID,red_h,)
+		"""
+		# size of red blood cell
+		width = 60.35
+		return width
 
 	# build environment related functions ----------------------------------------------------
 	def build_test_image(self,cell_list):
@@ -109,7 +124,7 @@ class vrepsim(object):
 
 	# take one step of action -------------------------------------------------------------------
 	def step(self,action,gama=0,pctg=0):
-		if (self._is_connected()==False):
+		if (self.is_connected()==False):
 			print ('Error: no connection has been established')
 			return False
 
@@ -122,10 +137,12 @@ class vrepsim(object):
 				pass
 		elif (action=='path'):
 			self._send_command(action,gama,pctg)
+			while (not self.path_stop()):
+				pass
 
 		hit_name = self.get_hit_object_name()
 		end_pos = []
-		res, end_pos = vrep.simxSetObjectPosition(self.clientID,self.omega,-1,vrep.simx_opmode_blocking)
+		res, end_pos = vrep.simxGetObjectPosition(self.clientID,self.omega,-1,vrep.simx_opmode_blocking)
 		if res==vrep.simx_return_ok:
 			print ("Get Omega position") # display the reply from V-REP (in this case, the handle of the created dummy)
 		else:
@@ -139,7 +156,8 @@ class vrepsim(object):
 		hit = 0
 		res, hit = vrep.simxGetIntegerSignal(self.clientID,'hit',vrep.simx_opmode_blocking)
 		if res==vrep.simx_return_ok:
-			print ("hit ", hit) # display the reply from V-REP (in this case, the handle of the created dummy)
+			pass
+			#print ("hit ", hit) # display the reply from V-REP (in this case, the handle of the created dummy)
 		else:
 			print ('Remote function call failed: is_hit')
 
@@ -180,7 +198,7 @@ class vrepsim(object):
 	def _get_gama_range(self, side):
 		gama_range = []
 		if (side=='top'):
-			gama_range = [range(0,90),range(270,360)]
+			gama_range = range(0,90)+range(270,360)
 		elif(side=='bottom'):
 			gama_range = range(90,270)
 		elif(side=='left'):
@@ -190,7 +208,8 @@ class vrepsim(object):
 		else:
 			res, angle = vrep.simxGetIntegerSignal(self.clientID,'gama',vrep.simx_opmode_blocking)
 			if res==vrep.simx_return_ok:
-				print ("gama ", angle) # display the reply from V-REP (in this case, the handle of the created dummy)
+				pass
+				#print ("gama ", angle) # display the reply from V-REP (in this case, the handle of the created dummy)
 			else:
 				print ('Remote function call failed: get gama')
 			gama_range = range(angle-30, angle+30)
@@ -202,7 +221,8 @@ class vrepsim(object):
 		hit_name = ''
 		res, hit_name = vrep.simxGetStringSignal(self.clientID,'hit_name',vrep.simx_opmode_blocking)
 		if res==vrep.simx_return_ok:
-			print ("hit ", hit_name) # display the reply from V-REP (in this case, the handle of the created dummy)
+			pass
+			#print ("hit ", hit_name) # display the reply from V-REP (in this case, the handle of the created dummy)
 		else:
 			print ('Remote function call failed: take action')
 
